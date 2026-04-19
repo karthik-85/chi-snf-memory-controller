@@ -15,3 +15,6 @@ vivado*.backup*
 # OS files
 .DS_Store
 Thumbs.db
+
+# ARM Spec - licensed document
+docs/*.pdf
