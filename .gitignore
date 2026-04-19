@@ -1,0 +1,17 @@
+# Simulation output files
+*.log
+*.wlf
+*.vcd
+*.shm/
+work/
+transcript
+
+# Vivado files
+*.jou
+*.str
+.Xil/
+vivado*.backup*
+
+# OS files
+.DS_Store
+Thumbs.db
