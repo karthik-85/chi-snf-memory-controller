@@ -35,11 +35,18 @@ module chi_req_decoder #(
 
 );
 
+localparam INIT_CREDIT = 4;
+localparam READNOSNP      = 7'b0000100;
+localparam WRITENOSNPPTL  = 7'b0011100;
+localparam WRITENOSNPFULL = 7'b0011101;
+
 // Internal signals
-// TODO: add credit counter
+logic[2:0] credit_counter;
+logic credit_over_flag;
 
 // Field extraction - only when flit is valid
-// TODO: add extraction logic
+assign req_is_read = (req_opcode == READNOSNP);
+assign req_is_write = (req_opcode == WRITENOSNPFULL) | (req_opcode == WRITENOSNPPTL);
 
 // Opcode decoding
 // TODO: add opcode decode
