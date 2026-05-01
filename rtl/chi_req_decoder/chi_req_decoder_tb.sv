@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module tb();
 
 localparam FLIT_WIDTH = 213;
@@ -52,11 +54,7 @@ chi_req_decoder#(
     .req_is_write(req_is_write)
 );
 
-initial begin
-    clk=0;
-end
-
-always #5 clk = ~clk;
+    always #5 clk = ~clk;
 
 task send_readnosnp (
     input logic [6:0] tgt_id,
@@ -67,37 +65,38 @@ task send_readnosnp (
 
 );
 
-logic[212:0] flit = 213'b0; // You will be driving this Flit into DUT
-
-flit[10:4] = tgt_id;
-flit[17:11] = src_id;
-flit[29:18] = txn_id;
-flit[115:64] = addr;
-flit[60:58] = size;
-flit[3:0] = '0; //QoS
-flit[120] = 0; //Allowretry
-flit[122:121] = '0; //Order
-flit[130:127] = 4'b0010; // MemAttr - Why are we using a realistic value?
-flit[141] = 0; //ExpCompAck
-flit[56:50] = 7'b0000100; //Opcode
-
-//Driving the Flit into DUT
-
-@(posedge clk);
-rxreqflitv = 1;
-rxreqflit = flit;
-//wait for one clk edge and deassert
-@(posedge clk);
-rxreqflitv = 0;
-rxreqflit = 0;
-
+    logic[212:0] flit = '0;
+    
+    flit[10:4] = tgt_id;
+    flit[17:11] = src_id;
+    flit[29:18] = txn_id;
+    flit[115:64] = addr;
+    flit[60:58] = size;
+    flit[3:0] = '0; //QoS
+    flit[120] = 0; //Allowretry
+    flit[122:121] = '0; //Order
+    flit[130:127] = 4'b0010; // MemAttr - Why are we using a realistic value?
+    flit[141] = 0; //ExpCompAck
+    flit[56:50] = 7'b0000100; //Opcode
+    
+    //Driving the Flit into DUT
+    
+    @(posedge clk);
+    rxreqflitv = 1;
+    rxreqflit = flit;
+    //wait for one clk edge and deassert
+    @(posedge clk);
+    rxreqflitv = 0;
+    rxreqflit = 0;
+    
 endtask
 
 initial begin
 
     $dumpfile("dump.vcd"); //For waveform view
     $dumpvars();
-
+    
+    clk=0;
     rst_n=0;
     rxreqflitv=0;
     rxreqflitpend=0;
@@ -110,7 +109,8 @@ initial begin
     //sending the flit (tgt,src,txn,addr,size)
     send_readnosnp(7'h01, 7'h02, 12'hABC, 52'h1000, 3'b110);
     
-    repeat(2)@(posedge clk); // waiting for outputs to settle
+    //repeat(2)@(posedge clk); // waiting for outputs to settle
+    //Commented the above delay as the values from function send_readnosnp are being updated in the same cycle
 
     if(req_is_read == 1 && req_is_write == 0 && req_valid == 1 && req_txn_id == 12'hABC && req_addr == 52'h1000 && req_size == 3'b110 && req_src_id == 7'h02 && req_tgt_id == 7'h01)begin
         $display("Simulation PASSED req_is_read:%0d, req_is_write:%0d, req_valid:%0d, req_txn_id:%0d, req_addr:%0d, req_size:%0d, req_src_id:%0d, req_tgt_id:%0d\n",req_is_read, req_is_write, req_valid, req_txn_id, req_addr, req_size, req_src_id, req_tgt_id);        
@@ -125,9 +125,9 @@ initial begin
 
     repeat(6)@(posedge clk);
     if(req_valid)
-        $display("req_valid is %0d and expected behavior\n",req_valid);
-    else
         $display("req_valid is %0d and unexpected behavior\n",req_valid);
+    else
+        $display("req_valid is %0d and expected behavior\n",req_valid);
 
     #120;
     $finish();    
