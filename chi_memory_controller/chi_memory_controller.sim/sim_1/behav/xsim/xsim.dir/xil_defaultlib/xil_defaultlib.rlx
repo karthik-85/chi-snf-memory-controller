@@ -1,0 +1,7 @@
+0.7
+2020.2
+Oct 14 2022
+05:20:55
+C:/Users/dodda/projects/chi-snf-memory-controller/chi_memory_controller/chi_memory_controller.sim/sim_1/behav/xsim/glbl.v,1665704903,verilog,,,,glbl,,uvm,,,,,,
+C:/Users/dodda/projects/chi-snf-memory-controller/rtl/chi_req_decoder/chi_req_decoder.sv,1777517758,systemVerilog,,C:/Users/dodda/projects/chi-snf-memory-controller/rtl/chi_req_decoder/chi_req_decoder_tb.sv,,chi_req_decoder,,uvm,,,,,,
+C:/Users/dodda/projects/chi-snf-memory-controller/rtl/chi_req_decoder/chi_req_decoder_tb.sv,1777605507,systemVerilog,,,,tb,,uvm,,,,,,
