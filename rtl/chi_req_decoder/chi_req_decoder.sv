@@ -34,6 +34,24 @@ module chi_req_decoder #(
     output logic                    req_is_write
 );
 
+// 2 stage input connection
+
+// Internal registered versions of outputs
+logic        req_valid_comb;
+logic [3:0]  req_qos_comb;
+logic [6:0]  req_tgt_id_comb;
+logic [6:0]  req_src_id_comb;
+logic [11:0] req_txn_id_comb;
+logic [6:0]  req_opcode_comb;
+logic [2:0]  req_size_comb;
+logic [51:0] req_addr_comb;
+logic        req_allow_retry_comb;
+logic [1:0]  req_order_comb;
+logic [3:0]  req_mem_attr_comb;
+logic        req_exp_comp_ack_comb;
+logic        req_is_read_comb;
+logic        req_is_write_comb;
+
 localparam INIT_CREDIT = 4;
 localparam READNOSNP      = 7'b0000100;
 localparam WRITENOSNPPTL  = 7'b0011100;
@@ -48,42 +66,42 @@ logic init_credit_over;
 // -----------------------------
 always_comb begin
     // Default values
-    req_qos          = '0;
-    req_tgt_id       = '0;
-    req_src_id       = '0;
-    req_txn_id       = '0;
-    req_opcode       = '0;
-    req_size         = '0;
-    req_addr         = '0;
-    req_allow_retry  = '0;
-    req_order        = '0;
-    req_mem_attr     = '0;
-    req_exp_comp_ack = '0;
+    req_qos_comb          = '0;
+    req_tgt_id_comb       = '0;
+    req_src_id_comb       = '0;
+    req_txn_id_comb       = '0;
+    req_opcode_comb       = '0;
+    req_size_comb         = '0;
+    req_addr_comb         = '0;
+    req_allow_retry_comb  = '0;
+    req_order_comb        = '0;
+    req_mem_attr_comb     = '0;
+    req_exp_comp_ack_comb = '0;
 
     if (rxreqflitv) begin
-        req_qos          = rxreqflit[3:0];
-        req_tgt_id       = rxreqflit[10:4];
-        req_src_id       = rxreqflit[17:11];
-        req_txn_id       = rxreqflit[29:18];
-        req_opcode       = rxreqflit[56:50];
-        req_size         = rxreqflit[60:58];
-        req_addr         = rxreqflit[115:64];
-        req_allow_retry  = rxreqflit[120];
-        req_order        = rxreqflit[122:121];
-        req_mem_attr     = rxreqflit[130:127];
-        req_exp_comp_ack = rxreqflit[141];
+        req_qos_comb          = rxreqflit[3:0];
+        req_tgt_id_comb       = rxreqflit[10:4];
+        req_src_id_comb       = rxreqflit[17:11];
+        req_txn_id_comb       = rxreqflit[29:18];
+        req_opcode_comb       = rxreqflit[56:50];
+        req_size_comb         = rxreqflit[60:58];
+        req_addr_comb         = rxreqflit[115:64];
+        req_allow_retry_comb  = rxreqflit[120];
+        req_order_comb        = rxreqflit[122:121];
+        req_mem_attr_comb     = rxreqflit[130:127];
+        req_exp_comp_ack_comb = rxreqflit[141];
     end
 end
 
 // -----------------------------
 // Opcode decoding
 // -----------------------------
-assign req_is_read  = rxreqflitv && (req_opcode == READNOSNP);
-assign req_is_write = rxreqflitv &&
-                      ((req_opcode == WRITENOSNPFULL) ||
-                       (req_opcode == WRITENOSNPPTL));
+// Correct � use the combinational wire
+assign req_is_read_comb  = rxreqflitv && (req_opcode_comb == READNOSNP);
+assign req_is_write_comb = rxreqflitv && ((req_opcode_comb == WRITENOSNPFULL) ||
+                                       (req_opcode_comb == WRITENOSNPPTL));
 
-assign req_valid = req_is_read || req_is_write;
+assign req_valid_comb = req_is_read_comb || req_is_write_comb;
 
 // -----------------------------
 // Credit return logic
@@ -134,6 +152,48 @@ always_ff @(posedge clk or negedge rst_n) begin
 
         endcase
     end
+end
+
+always_ff @(posedge clk or negedge rst_n)begin
+
+    if(!rst_n)begin
+
+    req_qos          <= '0;
+    req_tgt_id       <= '0;
+    req_src_id       <= '0;
+    req_txn_id       <= '0;
+    req_opcode       <= '0;
+    req_size         <= '0;
+    req_addr         <= '0;
+    req_allow_retry  <= '0;
+    req_order        <= '0;
+    req_mem_attr     <= '0;
+    req_exp_comp_ack <= '0;
+    req_is_read      <= '0;
+    req_is_write     <= '0;
+    req_valid        <= '0;
+        
+    end
+
+    else begin
+
+    req_qos          <= req_qos_comb;
+    req_tgt_id       <= req_tgt_id_comb;
+    req_src_id       <= req_src_id_comb;
+    req_txn_id       <= req_txn_id_comb;
+    req_opcode       <= req_opcode_comb;
+    req_size         <= req_size_comb;
+    req_addr         <= req_addr_comb;
+    req_allow_retry  <= req_allow_retry_comb;
+    req_order        <= req_order_comb;
+    req_mem_attr     <= req_mem_attr_comb;
+    req_exp_comp_ack <= req_exp_comp_ack_comb;
+    req_is_read      <= req_is_read_comb;
+    req_is_write     <= req_is_write_comb;
+    req_valid        <= req_valid_comb;
+        
+    end
+    
 end
 
 endmodule
